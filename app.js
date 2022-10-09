@@ -26,6 +26,10 @@ app.use((req, res, next) => {
 app.use('/cards', routerCards);
 app.use('/users', routerUsers);
 
+app.use('*', (req, res) => {
+  res.status(404).send({ message: 'Неправильный путь' });
+});
+
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
   /* eslint-disable no-console */
