@@ -9,7 +9,7 @@ const getUsers = (req, res) => {
 const getUser = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => user ? res.send({data: user}) : res.status(404).send({message: 'Пользователь не найден'}))
-    .catch(err => res.status(500).send({message: 'Произошла ошибка c одним юзером'})
+    .catch(err => err.name === "CastError" ? res.status(400).send({message: 'Id не валиден'}) : res.status(500).send({message: 'Произошла ошибка c одним юзером'})
     );
 }
 
@@ -31,7 +31,15 @@ const updateUser = (req, res) => {
       runValidators: true, // данные будут валидированы перед изменением
     })
     .then((user) => user ? res.send({data: user}) : res.status(404).send({message: 'Пользователь не найден'}))
-    .catch(err => err.name === "ValidationError" ? res.status(400).send({ message: 'фильтрцию не прошел' }) : res.status(500).send({ message: 'Произошла ошибка c созданием юзера' }));
+    .catch(err => {
+      if (err.name === "ValidationError") {
+        return res.status(400).send({message: 'фильтрцию не прошел'});
+      }
+      if (err.name === "CastError") {
+        return res.status(400).send({message: 'id не валиден'});
+      }
+       return res.status(500).send({message: 'Произошла ошибка c созданием юзера'})
+    });
 }
 
 const updateAvatar = (req, res) => {
@@ -43,7 +51,15 @@ const updateAvatar = (req, res) => {
       runValidators: true, // данные будут валидированы перед изменением
     })
     .then((user) => user ? res.send({data: user}) : res.status(404).send({message: 'Пользователь не найден'}))
-    .catch(err => err.name === "ValidationError" ? res.status(400).send({ message: 'фильтрцию не прошел' }) : res.status(500).send({ message: 'Произошла ошибка c созданием юзера' }));
+    .catch(err => {
+      if (err.name === "ValidationError") {
+        return res.status(400).send({message: 'фильтрцию не прошел'});
+      }
+      if (err.name === "CastError") {
+        return res.status(400).send({message: 'id не валиден'});
+      }
+      return res.status(500).send({message: 'Произошла ошибка c обновлением юзера'})
+    });
 }
 
 module.exports = { getUsers, getUser, postUser, updateUser, updateAvatar }

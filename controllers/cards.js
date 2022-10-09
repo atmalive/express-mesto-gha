@@ -9,7 +9,12 @@ const getCards = (req, res) => {
 const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => card ? res.send({data: card}) : res.status(404).send({ message: 'Карточка с указанным _id не найдена' }))
-    .catch(err => res.status(500).send({ message: 'Произошла ошибка c одним card' }));
+    .catch(err => {
+      if (err.name === "CastError") {
+        return res.status(400).send({message: 'id не валиден'});
+      }
+      return res.status(500).send({message: 'Произошла ошибка c удалением карточки'})
+    });
 }
 
 const postCard = (req, res) => {
@@ -27,7 +32,15 @@ const addLike = (req, res) => {
     { new: true },
   )
     .then((card) => card ? res.send({data: card}) : res.status(404).send({ message: 'Карточка с указанным _id не найдена' }))
-    .catch(err => err.name === "ValidationError" ? res.status(400).send({ message: 'Переданы некорректные данные для постановки лайка' }) : res.status(500).send({ message: 'Произошла ошибка c созданием card' }));
+    .catch(err => {
+      if (err.name === "ValidationError") {
+        return res.status(400).send({message: 'Переданы некорректные данные для постановки лайка'});
+      }
+      if (err.name === "CastError") {
+        return res.status(400).send({message: 'id не валиден'});
+      }
+      return res.status(500).send({message: 'Произошла ошибка c постановкой лайка'})
+    });
 }
 
 const removeLike = (req, res) => {
@@ -37,7 +50,15 @@ const removeLike = (req, res) => {
       { new: true },
     )
     .then((card) => card ? res.send({data: card}) : res.status(404).send({ message: 'Карточка с указанным _id не найдена' }))
-    .catch(err => err.name === "ValidationError" ? res.status(400).send({ message: 'Переданы некорректные данные для снятия лайка' }) : res.status(500).send({ message: 'Произошла ошибка c созданием card' }));
+    .catch(err => {
+      if (err.name === "ValidationError") {
+        return res.status(400).send({message: 'Переданы некорректные данные для удаления лайка'});
+      }
+      if (err.name === "CastError") {
+        return res.status(400).send({message: 'id не валиден'});
+      }
+      return res.status(500).send({message: 'Произошла ошибка c удаления лайка'})
+    });
 }
 
 module.exports = { getCards, deleteCard, postCard, addLike, removeLike }
