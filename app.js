@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const routerUsers = require('./routes/users'); // импортируем роутер
 const routerCards = require('./routes/cards');
+const {ERRORS} = require("./utils/errors");
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
 
@@ -27,7 +28,7 @@ app.use('/cards', routerCards);
 app.use('/users', routerUsers);
 
 app.use('*', (req, res) => {
-  res.status(404).send({ message: 'Неправильный путь' });
+  res.status(ERRORS.NOT_FOUND.ERROR_CODE).send({ message: ERRORS.NOT_FOUND.BAD_WAY });
 });
 
 app.listen(PORT, () => {
