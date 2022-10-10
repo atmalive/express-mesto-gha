@@ -1,16 +1,18 @@
 const User = require('../models/user');
-const {ERRORS, MONGOOSE_ERR} = require("../utils/errors");
+const { ERRORS, MONGOOSE_ERR } = require('../utils/errors');
 
 const getUsers = (req, res) => {
   User.find()
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(ERRORS.DEFAULT_ERROR.ERROR_CODE).send({ message: ERRORS.DEFAULT_ERROR.USER}));
+    .catch(() => res.status(ERRORS.DEFAULT_ERROR.ERROR_CODE).send({ message: ERRORS.DEFAULT_ERROR.USER }));
 };
 
 const getUser = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => (user ? res.send({ data: user }) : res.status(ERRORS.NOT_FOUND.ERROR_CODE).send({ message: ERRORS.NOT_FOUND.USER })))
-    .catch((err) => (err.name === MONGOOSE_ERR.CASTERR ? res.status(ERRORS.VALIDATION.ERROR_CODE).send({ message: ERRORS.VALIDATION.USER }) : res.status(ERRORS.DEFAULT_ERROR.ERROR_CODE).send({ message: ERRORS.DEFAULT_ERROR.USER })));
+    .catch((err) => (err.name === MONGOOSE_ERR.CASTERR
+      ? res.status(ERRORS.VALIDATION.ERROR_CODE).send({ message: ERRORS.VALIDATION.USER })
+      : res.status(ERRORS.DEFAULT_ERROR.ERROR_CODE).send({ message: ERRORS.DEFAULT_ERROR.USER })));
 };
 
 const postUser = (req, res) => {

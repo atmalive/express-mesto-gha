@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const routerUsers = require('./routes/users'); // импортируем роутер
 const routerCards = require('./routes/cards');
-const {ERRORS} = require("./utils/errors");
+const { ERRORS } = require('./utils/errors');
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
 
