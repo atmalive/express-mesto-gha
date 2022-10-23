@@ -37,7 +37,7 @@ const getMe = (req, res, next) => {
 
 const postUser = (req, res, next) => {
   const {
-    name, about, avatar, email, password,
+    email, password,
   } = req.body;
   User.findOne({ email })
     .then((user) => {
@@ -47,7 +47,7 @@ const postUser = (req, res, next) => {
       bcrypt.hash(password, 10)
         .then((hash) => {
           User.create({
-            name, about, avatar, email, password: hash,
+            email, password: hash,
           })
             .then((userData) => {
               if (!userData) {
