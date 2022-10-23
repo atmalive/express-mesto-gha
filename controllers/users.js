@@ -1,74 +1,127 @@
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { ERRORS, MONGOOSE_ERR } = require('../utils/errors');
+const { ERRORS } = require('../utils/errors');
+const NotFoundError = require('../errors/NotFoundError');
+const NotCorrectData = require('../errors/NotCorrectData');
+const AuntificationError = require('../errors/AuntificationError');
+const IsUser = require('../errors/IsUser');
+require('dotenv').config();
 
-const getUsers = (req, res) => {
+const { NODE_ENV, JWT_SECRET } = process.env;
+
+const getUsers = (req, res, next) => {
   User.find()
-    .then((users) => res.send({ data: users }))
-    .catch(() => res.status(ERRORS.DEFAULT_ERROR.ERROR_CODE).send({ message: ERRORS.DEFAULT_ERROR.USER }));
+    .then((users) => {
+      if (!users) {
+        throw new NotFoundError(ERRORS.DEFAULT_ERROR.USER);
+      }
+      res.send({ data: users });
+    })
+    .catch(next);
 };
 
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
   User.findById(req.params.userId)
-    .then((user) => (user ? res.send({ data: user }) : res.status(ERRORS.NOT_FOUND.ERROR_CODE).send({ message: ERRORS.NOT_FOUND.USER })))
-    .catch((err) => (err.name === MONGOOSE_ERR.CASTERR
-      ? res.status(ERRORS.VALIDATION.ERROR_CODE).send({ message: ERRORS.VALIDATION.USER })
-      : res.status(ERRORS.DEFAULT_ERROR.ERROR_CODE).send({ message: ERRORS.DEFAULT_ERROR.USER })));
-};
-
-const postUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+    .orFail(new NotFoundError(ERRORS.NOT_FOUND.USER))
     .then((user) => res.send({ data: user }))
-    .catch((err) => (err.name === MONGOOSE_ERR.VALIDERR ? res.status(ERRORS.VALIDATION.ERROR_CODE).send({ message: ERRORS.VALIDATION.USER })
-      : res.status(ERRORS.DEFAULT_ERROR.ERROR_CODE).send({ message: ERRORS.DEFAULT_ERROR.USER })));
+    .catch(next);
 };
 
-const updateUser = (req, res) => {
+const getMe = (req, res, next) => {
+  User.findById(req.user._id)
+    .orFail(new NotFoundError(ERRORS.NOT_FOUND.USER))
+    .then((user) => res.send({ data: user }))
+    .catch(next);
+};
+
+const postUser = (req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  User.findOne({ email })
+    .then((user) => {
+      if (user) {
+        throw new IsUser(ERRORS.IS_USER.USER_ERROR);
+      }
+      bcrypt.hash(password, 10)
+        .then((hash) => {
+          User.create({
+            name, about, avatar, email, password: hash,
+          })
+            .then((userData) => {
+              if (!userData) {
+                throw new NotCorrectData(ERRORS.VALIDATION.USER);
+              }
+              res.send({ data: userData });
+            });
+        });
+    })
+    .catch(next);
+};
+
+const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   const userId = req.user._id;
   User.findByIdAndUpdate(
     userId,
     { name, about },
     {
-      new: true, // обработчик then получит на вход обновлённую запись
-      runValidators: true, // данные будут валидированы перед изменением
+      new: true,
+      runValidators: true,
     },
   )
-    .then((user) => (user ? res.send({ data: user }) : res.status(ERRORS.NOT_FOUND.ERROR_CODE).send({ message: ERRORS.NOT_FOUND.USER })))
-    .catch((err) => {
-      if (err.name === MONGOOSE_ERR.VALIDERR) {
-        return res.status(ERRORS.VALIDATION.ERROR_CODE).send({ message: ERRORS.VALIDATION.USER });
+    .orFail(new NotFoundError(ERRORS.NOT_FOUND.USER))
+    .then((user) => {
+      if (!user) {
+        throw new NotCorrectData(ERRORS.VALIDATION.USER);
       }
-      if (err.name === MONGOOSE_ERR.CASTERR) {
-        return res.status(ERRORS.VALIDATION.ERROR_CODE).send({ message: ERRORS.VALIDATION.USER_ME });
-      }
-      return res.status(ERRORS.DEFAULT_ERROR.ERROR_CODE).send({ message: ERRORS.DEFAULT_ERROR.USER });
-    });
+      res.send({ data: user });
+    })
+    .catch(next);
 };
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   const userId = req.user._id;
   User.findByIdAndUpdate(
     userId,
     { avatar },
     {
-      new: true, // обработчик then получит на вход обновлённую запись
-      runValidators: true, // данные будут валидированы перед изменением
+      new: true,
+      runValidators: true,
     },
   )
-    .then((user) => (user ? res.send({ data: user }) : res.status(404).send({ message: 'Пользователь не найден' })))
-    .catch((err) => {
-      if (err.name === MONGOOSE_ERR.VALIDERR) {
-        return res.status(ERRORS.VALIDATION.ERROR_CODE).send({ message: ERRORS.VALIDATION.USER });
+    .orFail(new NotFoundError(ERRORS.NOT_FOUND.USER))
+    .then((user) => {
+      if (!user) {
+        throw new NotCorrectData(ERRORS.VALIDATION.USER);
       }
-      if (err.name === MONGOOSE_ERR.CASTERR) {
-        return res.status(ERRORS.VALIDATION.ERROR_CODE).send({ message: ERRORS.VALIDATION.USER_ME });
-      }
-      return res.status(ERRORS.DEFAULT_ERROR.ERROR_CODE).send({ message: ERRORS.DEFAULT_ERROR.USER });
-    });
+      res.send({ data: user });
+    })
+    .catch(next);
+};
+
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+  User.findOne({ email }).select('+password')
+    .orFail(new NotFoundError(ERRORS.AUNTIFICATION_ERROR.USER_ERROR))
+    .then((user) => bcrypt.compare(password, user.password)
+      .then((result) => {
+        if (!result) {
+          throw new AuntificationError(ERRORS.AUNTIFICATION_ERROR.USER_ERROR);
+        }
+        const token = jwt.sign(
+          { _id: user._id },
+          NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+          { expiresIn: '7d' },
+        );
+        res.cookie('token', token, { httpOnly: true });
+        res.send({ message: 'Всё верно!' });
+      })
+      .catch(next));
 };
 
 module.exports = {
-  getUsers, getUser, postUser, updateUser, updateAvatar,
+  getUsers, getUser, getMe, postUser, updateUser, updateAvatar, login,
 };

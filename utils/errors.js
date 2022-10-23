@@ -5,7 +5,7 @@ module.exports.ERRORS = {
     CARDS_LIKE: 'Передан несуществующий _id карточки.',
     USER: 'Пользователь по указанному _id не найден.',
     BAD_WAY: 'Неправильный путь',
-    // USER_ID: 'Пользователь по указанному _id не найден.',
+    USER_ID: 'Пользователь по указанному _id не найден.',
     // USER_ME: 'Пользователь с указанным _id не найден.',
     // USER_AVATAR: 'Пользователь с указанным _id не найден.'
   },
@@ -22,6 +22,18 @@ module.exports.ERRORS = {
     ERROR_CODE: 500,
     CARDS: 'Ошибка по-умолчанию.',
     USER: 'Ошибка по-умолчанию.',
+  },
+  AUNTIFICATION_ERROR: {
+    ERROR_CODE: 401,
+    USER_ERROR: 'Ошибка авторизации.',
+  },
+  NO_RIGHT: {
+    ERROR_CODE: 403,
+    USER_ERROR: 'Нет прав.',
+  },
+  IS_USER: {
+    ERROR_CODE: 409,
+    USER_ERROR: 'Такой пользователь уже зареган.',
   },
 };
 

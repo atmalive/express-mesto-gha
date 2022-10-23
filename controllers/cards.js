@@ -1,61 +1,66 @@
 const Card = require('../models/card');
-const { ERRORS, MONGOOSE_ERR } = require('../utils/errors');
+const { ERRORS } = require('../utils/errors');
+const NotFoundError = require('../errors/NotFoundError');
+const NoRight = require('../errors/NoRight');
+const NotCorrectData = require('../errors/NotCorrectData');
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find()
-    .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(ERRORS.DEFAULT_ERROR.ERROR_CODE).send({ message: ERRORS.DEFAULT_ERROR.CARDS }));
-};
-
-const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => (card ? res.send({ data: card }) : res.status(ERRORS.NOT_FOUND.ERROR_CODE).send({ message: ERRORS.NOT_FOUND.CARDS })))
-    .catch((err) => {
-      if (err.name === MONGOOSE_ERR.CASTERR) {
-        return res.status(ERRORS.VALIDATION.ERROR_CODE).send({ message: ERRORS.VALIDATION.CARDS });
+    .then((cards) => {
+      if (!cards) {
+        throw new NotFoundError(ERRORS.DEFAULT_ERROR.CARDS);
       }
-      return res.status(ERRORS.DEFAULT_ERROR.ERROR_CODE).send({ message: ERRORS.DEFAULT_ERROR.CARDS });
-    });
+      res.send({ data: cards });
+    })
+    .catch(next);
 };
 
-const postCard = (req, res) => {
+const deleteCard = (req, res, next) => {
+  Card.findById(req.params.cardId)
+    .orFail(new NotFoundError(ERRORS.DEFAULT_ERROR.CARDS))
+    .then((card) => {
+      if (card.owner !== req.user._id) {
+        throw new NoRight(ERRORS.NO_RIGHT.USER_ERROR);
+      }
+      Card.deleteOne(card)
+        .then((data) => res.send({ data }));
+    })
+    .catch(next);
+};
+
+const postCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then((card) => res.send({ data: card }))
-    .catch((err) => (err.name === MONGOOSE_ERR.VALIDERR
-      ? res.status(ERRORS.VALIDATION.ERROR_CODE).send({ message: ERRORS.VALIDATION.CARDS })
-      : res.status(ERRORS.DEFAULT_ERROR.ERROR_CODE).send({ message: ERRORS.DEFAULT_ERROR.CARDS })));
+    .then((card) => {
+      if (!card) {
+        throw new NotCorrectData(ERRORS.VALIDATION.CARDS);
+      }
+      res.send({ data: card });
+    })
+    .catch(next);
 };
 
-const addLike = (req, res) => {
+const addLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .then((card) => (card ? res.send({ data: card }) : res.status(ERRORS.NOT_FOUND.ERROR_CODE).send({ message: ERRORS.NOT_FOUND.CARDS })))
-    .catch((err) => {
-      if (err.name === MONGOOSE_ERR.CASTERR) {
-        return res.status(ERRORS.VALIDATION.ERROR_CODE).send({ message: ERRORS.VALIDATION.CARDS_LIKE });
-      }
-      return res.status(ERRORS.DEFAULT_ERROR.ERROR_CODE).send({ message: ERRORS.DEFAULT_ERROR.CARDS });
-    });
+    .orFail(new NotFoundError(ERRORS.NOT_FOUND.CARDS))
+    .then((card) => (res.send({ data: card })))
+    .catch(next);
 };
 
-const removeLike = (req, res) => {
+const removeLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .then((card) => (card ? res.send({ data: card }) : res.status(ERRORS.NOT_FOUND.ERROR_CODE).send({ message: ERRORS.NOT_FOUND.CARDS_LIKE })))
-    .catch((err) => {
-      if (err.name === MONGOOSE_ERR.CASTERR) {
-        return res.status(ERRORS.VALIDATION.ERROR_CODE).send({ message: ERRORS.VALIDATION.CARDS_LIKE });
-      }
-      return res.status(ERRORS.DEFAULT_ERROR.ERROR_CODE).send({ message: ERRORS.DEFAULT_ERROR.CARDS });
-    });
+    .orFail(new NotFoundError(ERRORS.NOT_FOUND.CARDS_LIKE))
+    .then((card) => res.send({ data: card }))
+    .catch(next);
 };
 
 module.exports = {
