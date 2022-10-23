@@ -33,7 +33,7 @@ app.post('/signup', celebrate({
     password: Joi.string().required(),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    link: Joi.string().pattern(new RegExp(regex)),
+    avatar: Joi.string().pattern(new RegExp(regex)),
   }),
 }), postUser);
 
