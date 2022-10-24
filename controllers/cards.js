@@ -38,7 +38,7 @@ const postCard = (req, res, next) => {
       res.send({ data: card });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         next(err);
       } else {
         next(err);

@@ -59,7 +59,7 @@ const postUser = (req, res, next) => {
         });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         next(err);
       } else {
         next(err);
@@ -83,7 +83,7 @@ const updateUser = (req, res, next) => {
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         next(err);
       } else {
         next(err);
@@ -107,7 +107,7 @@ const updateAvatar = (req, res, next) => {
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         next(err);
       } else {
         next(err);
