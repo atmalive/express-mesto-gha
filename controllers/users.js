@@ -53,7 +53,11 @@ const postUser = (req, res, next) => {
               if (!userData) {
                 throw new NotCorrectData(ERRORS.VALIDATION.USER);
               }
-              res.send({ data: userData });
+              res.send({
+                data: {
+                  email: userData.email, name: userData.name, about: userData.about, avatar: userData.avatar,
+                },
+              });
             });
         });
     })
@@ -119,7 +123,8 @@ const login = (req, res, next) => {
         res.cookie('token', token, { httpOnly: true });
         res.send({ message: 'Всё верно!' });
       })
-      .catch(next));
+      .catch(next))
+    .catch(next);
 };
 
 module.exports = {
