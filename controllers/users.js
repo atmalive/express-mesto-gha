@@ -5,6 +5,7 @@ const { ERRORS } = require('../utils/errors');
 const NotFoundError = require('../errors/NotFoundError');
 const AuntificationError = require('../errors/AuntificationError');
 const IsUser = require('../errors/IsUser');
+const NotCorrectData = require('../errors/NotCorrectData');
 require('dotenv').config();
 
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -23,7 +24,7 @@ const getUser = (req, res, next) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(err);
+        next(new NotCorrectData(ERRORS.VALIDATION.GENERAL));
       } else {
         next(err);
       }
@@ -60,7 +61,7 @@ const postUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(err);
+        next(new NotCorrectData(ERRORS.VALIDATION.GENERAL));
       } else {
         next(err);
       }
@@ -84,7 +85,7 @@ const updateUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(err);
+        next(new NotCorrectData(ERRORS.VALIDATION.GENERAL));
       } else {
         next(err);
       }
@@ -108,7 +109,7 @@ const updateAvatar = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(err);
+        next(new NotCorrectData(ERRORS.VALIDATION.GENERAL));
       } else {
         next(err);
       }

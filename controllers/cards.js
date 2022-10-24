@@ -2,6 +2,7 @@ const Card = require('../models/card');
 const { ERRORS } = require('../utils/errors');
 const NotFoundError = require('../errors/NotFoundError');
 const NoRight = require('../errors/NoRight');
+const NotCorrectData = require('../errors/NotCorrectData');
 
 const getCards = (req, res, next) => {
   Card.find()
@@ -23,7 +24,7 @@ const deleteCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(err);
+        next(new NotCorrectData(ERRORS.VALIDATION.GENERAL));
       } else {
         next(err);
       }
@@ -39,7 +40,7 @@ const postCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(err);
+        next(new NotCorrectData(ERRORS.VALIDATION.GENERAL));
       } else {
         next(err);
       }
@@ -56,7 +57,7 @@ const addLike = (req, res, next) => {
     .then((card) => (res.send({ data: card })))
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(err);
+        next(new NotCorrectData(ERRORS.VALIDATION.GENERAL));
       } else {
         next(err);
       }
@@ -73,7 +74,7 @@ const removeLike = (req, res, next) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(err);
+        next(new NotCorrectData(ERRORS.VALIDATION.GENERAL));
       } else {
         next(err);
       }
