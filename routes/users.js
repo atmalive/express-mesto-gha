@@ -7,9 +7,9 @@ const { regex } = require('../utils/regex');
 
 routerUsers.get('/', getUsers);
 
-routerUsers.get('/:userId', celebrate({ params: Joi.object().keys({ userId: Joi.string().alphanum().length(24) }) }), getUser);
-
 routerUsers.get('/me', getMe);
+
+routerUsers.get('/:userId', celebrate({ params: Joi.object().keys({ userId: Joi.string().alphanum().length(24) }) }), getUser);
 
 routerUsers.patch('/me', celebrate({
   body: Joi.object().keys({ name: Joi.string().required().min(2).max(30), about: Joi.string().required().min(2).max(30) }),
