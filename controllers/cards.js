@@ -23,7 +23,7 @@ const deleteCard = (req, res, next) => {
         throw new NoRight(ERRORS.NO_RIGHT.USER_ERROR);
       }
       Card.deleteOne(card)
-        .then((data) => res.send({ data }));
+        .then(() => res.send({ message: 'карточка удалена' }));
     })
     .catch(next);
 };

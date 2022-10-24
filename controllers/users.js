@@ -24,14 +24,14 @@ const getUsers = (req, res, next) => {
 const getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail(new NotFoundError(ERRORS.NOT_FOUND.USER))
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send(user))
     .catch(next);
 };
 
 const getMe = (req, res, next) => {
   User.findById(req.user._id)
     .orFail(new NotFoundError(ERRORS.NOT_FOUND.USER))
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send(user))
     .catch(next);
 };
 
@@ -54,9 +54,7 @@ const postUser = (req, res, next) => {
                 throw new NotCorrectData(ERRORS.VALIDATION.USER);
               }
               res.send({
-                data: {
-                  email: userData.email, name: userData.name, about: userData.about, avatar: userData.avatar,
-                },
+                email: userData.email, name: userData.name, about: userData.about, avatar: userData.avatar,
               });
             });
         });
@@ -109,7 +107,7 @@ const updateAvatar = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email }).select('+password')
-    .orFail(new NotFoundError(ERRORS.AUNTIFICATION_ERROR.USER_ERROR))
+    .orFail(new AuntificationError(ERRORS.AUNTIFICATION_ERROR.USER_ERROR))
     .then((user) => bcrypt.compare(password, user.password)
       .then((result) => {
         if (!result) {
