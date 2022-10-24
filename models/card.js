@@ -1,30 +1,34 @@
-// models/user.js
 const mongoose = require('mongoose');
+const { regex } = require('../utils/regex');
 
 const cardSchema = new mongoose.Schema({
-  name: { // у пользователя есть имя — опишем требования к имени в схеме:
-    type: String, // имя — это строка
-    required: true, // оно должно быть у каждого пользователя, так что имя — обязательное поле
-    minlength: 2, // минимальная длина имени — 2 символа
-    maxlength: 30, // а максимальная — 30 символов
+  name: {
+    type: String,
+    required: true,
+    minlength: 2,
+    maxlength: 30,
   },
-  link: { // у пользователя есть имя — опишем требования к имени в схеме:
-    type: String, // имя — это строка
-    required: true, // оно должно быть у каждого пользователя, так что имя — обязательное поле
+  link: {
+    type: String,
+    required: true,
+    validate: {
+      validator: (v) => regex.test(v),
+      message: 'можно только ссыль б',
+    },
   },
-  owner: { // у пользователя есть имя — опишем требования к имени в схеме:
-    type: mongoose.Schema.Types.ObjectId, // имя — это строка
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
-    required: true, // оно должно быть у каждого пользователя, так что имя — обязательное поле
+    required: true,
   },
-  likes: { // у пользователя есть имя — опишем требования к имени в схеме:
-    type: [mongoose.Schema.Types.ObjectId], // имя — это строка
+  likes: {
+    type: [mongoose.Schema.Types.ObjectId],
     ref: 'user',
-    default: [], // оно должно быть у каждого пользователя, так что имя — обязательное поле
+    default: [],
   },
-  createdAt: { // у пользователя есть имя — опишем требования к имени в схеме:
-    type: Date, // имя — это строка
-    default: Date.now, // оно должно быть у каждого пользователя, так что имя — обязательное поле
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 

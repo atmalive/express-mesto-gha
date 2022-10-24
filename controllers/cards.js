@@ -2,14 +2,10 @@ const Card = require('../models/card');
 const { ERRORS } = require('../utils/errors');
 const NotFoundError = require('../errors/NotFoundError');
 const NoRight = require('../errors/NoRight');
-const NotCorrectData = require('../errors/NotCorrectData');
 
 const getCards = (req, res, next) => {
   Card.find()
     .then((cards) => {
-      if (!cards) {
-        throw new NotFoundError(ERRORS.DEFAULT_ERROR.CARDS);
-      }
       res.send({ data: cards });
     })
     .catch(next);
@@ -25,7 +21,13 @@ const deleteCard = (req, res, next) => {
       Card.deleteOne(card)
         .then(() => res.send({ message: 'карточка удалена' }));
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(err);
+      } else {
+        next(err);
+      }
+    });
 };
 
 const postCard = (req, res, next) => {
@@ -33,12 +35,15 @@ const postCard = (req, res, next) => {
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => {
-      if (!card) {
-        throw new NotCorrectData(ERRORS.VALIDATION.CARDS);
-      }
       res.send({ data: card });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(err);
+      } else {
+        next(err);
+      }
+    });
 };
 
 const addLike = (req, res, next) => {
@@ -49,7 +54,13 @@ const addLike = (req, res, next) => {
   )
     .orFail(new NotFoundError(ERRORS.NOT_FOUND.CARDS))
     .then((card) => (res.send({ data: card })))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(err);
+      } else {
+        next(err);
+      }
+    });
 };
 
 const removeLike = (req, res, next) => {
@@ -60,7 +71,13 @@ const removeLike = (req, res, next) => {
   )
     .orFail(new NotFoundError(ERRORS.NOT_FOUND.CARDS_LIKE))
     .then((card) => res.send({ data: card }))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(err);
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports = {

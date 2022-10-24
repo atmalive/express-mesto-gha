@@ -14,10 +14,10 @@ routerCards.post('/', celebrate({
   }),
 }), postCard);
 
-routerCards.delete('/:cardId', celebrate({ params: Joi.object().keys({ cardId: Joi.string().alphanum().length(24) }) }), deleteCard);
+routerCards.delete('/:cardId', celebrate({ params: Joi.object().keys({ cardId: Joi.string().alphanum().hex().length(24) }) }), deleteCard);
 
-routerCards.put('/:cardId/likes', celebrate({ params: Joi.object().keys({ cardId: Joi.string().alphanum().length(24) }) }), addLike);
+routerCards.put('/:cardId/likes', celebrate({ params: Joi.object().keys({ cardId: Joi.string().alphanum().hex().length(24) }) }), addLike);
 
-routerCards.delete('/:cardId/likes', celebrate({ params: Joi.object().keys({ cardId: Joi.string().alphanum().length(24) }) }), removeLike);
+routerCards.delete('/:cardId/likes', celebrate({ params: Joi.object().keys({ cardId: Joi.string().alphanum().hex().length(24) }) }), removeLike);
 
 module.exports = routerCards;
