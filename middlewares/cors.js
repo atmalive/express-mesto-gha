@@ -1,6 +1,3 @@
-// Массив доменов, с которых разрешены кросс-доменные запросы
-import app from "bcrypt/promises";
-
 const allowedCors = [
   'https://mestoatmalive.nomoredomains.icu',
   'http://mestoatmalive.nomoredomains.icu',
@@ -16,3 +13,4 @@ const CORS = (req, res, next) => {
   }
   next();
 }
+module.exports = {CORS}
