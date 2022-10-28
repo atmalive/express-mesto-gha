@@ -48,6 +48,12 @@ app.post('/signup', celebrate({
   }),
 }), postUser);
 
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
+
 app.use(auth);
 
 app.use('/cards', routerCards);
@@ -60,12 +66,6 @@ app.use(errorLogger);
 
 app.use(errors());
 app.use(handleErrors);
-
-app.get('/crash-test', () => {
-  setTimeout(() => {
-    throw new Error('Сервер сейчас упадёт');
-  }, 0);
-});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
