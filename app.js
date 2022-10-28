@@ -14,7 +14,7 @@ const { regex } = require('./utils/regex');
 const NotFoundError = require('./errors/NotFoundError');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 // const cors = require('./middlewares/cors');
-const corsOptions = { origin: ['http://localhost:3000', 'http://mestoatmalive.nomoredomains.icu','https://mestoatmalive.nomoredomains.icu', ],
+const corsOptions = { origin: ['http://localhost:3000','http://localhost:3001', 'http://mestoatmalive.nomoredomains.icu','https://mestoatmalive.nomoredomains.icu', ],
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'], preflightContinue: false,
   optionsSuccessStatus: 204, allowedHeaders: [ 'Content-Type', 'origin', 'x-access-token', 'Authorization', ],
   credentials: true,};

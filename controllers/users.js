@@ -81,7 +81,7 @@ const updateUser = (req, res, next) => {
   )
     .orFail(new NotFoundError(ERRORS.NOT_FOUND.USER))
     .then((user) => {
-      res.send({ data: user });
+      res.send( user );
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -105,7 +105,7 @@ const updateAvatar = (req, res, next) => {
   )
     .orFail(new NotFoundError(ERRORS.NOT_FOUND.USER))
     .then((user) => {
-      res.send({ data: user });
+      res.send( user );
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -130,7 +130,8 @@ const login = (req, res, next) => {
           NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
           { expiresIn: '7d' },
         );
-        res.cookie('token', token, { httpOnly: true });
+        console.log(token)
+        res.cookie('token', token, { httpOnly: true, sameSite: true });
         res.send({ message: 'Всё верно!' });
       })
       .catch(next))
