@@ -13,7 +13,6 @@ const { handleErrors } = require('./middlewares/errors');
 const { regex } = require('./utils/regex');
 const NotFoundError = require('./errors/NotFoundError');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-// const cors = require('./middlewares/cors');
 const corsOptions = { origin: ['http://localhost:3000','http://localhost:3001', 'http://mestoatmalive.nomoredomains.icu','https://mestoatmalive.nomoredomains.icu', ],
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'], preflightContinue: false,
   optionsSuccessStatus: 204, allowedHeaders: [ 'Content-Type', 'origin', 'x-access-token', 'Authorization', ],
@@ -27,7 +26,7 @@ const app = express();
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
 });
-// app.use(cors);
+
 app.use('*',cors(corsOptions));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -61,6 +60,12 @@ app.use(errorLogger);
 
 app.use(errors());
 app.use(handleErrors);
+
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
