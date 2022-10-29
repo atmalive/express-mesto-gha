@@ -60,13 +60,6 @@ const postUser = (req, res, next) => {
           next(err);
         }
       }));
-
-  User.findOne({ email })
-    .then((user) => {
-      if (user) {
-        throw new IsUser(ERRORS.IS_USER.USER_ERROR);
-      }
-    });
 };
 
 const updateUser = (req, res, next) => {
