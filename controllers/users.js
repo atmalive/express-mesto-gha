@@ -138,6 +138,11 @@ const login = (req, res, next) => {
     .catch(next);
 };
 
+const singOut = (req, res) => {
+  res.clearCookie('token');
+  res.send({ message: 'Вы вышли!' });
+};
+
 module.exports = {
-  getUsers, getUser, getMe, postUser, updateUser, updateAvatar, login,
+  getUsers, getUser, getMe, postUser, updateUser, updateAvatar, login, singOut,
 };

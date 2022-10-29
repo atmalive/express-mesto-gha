@@ -1,7 +1,7 @@
 const routerMain = require('express').Router();
 
 const { celebrate, Joi } = require('celebrate');
-const { login, postUser } = require('../controllers/users');
+const { login, postUser, singOut } = require('../controllers/users');
 const { regex } = require('../utils/regex');
 const auth = require('../middlewares/auth');
 const routerCards = require('./cards');
@@ -31,6 +31,8 @@ routerMain.use(auth);
 
 routerMain.use('/cards', routerCards);
 routerMain.use('/users', routerUsers);
+
+routerMain.post('/signout', singOut);
 
 module.exports = {
   routerMain,
