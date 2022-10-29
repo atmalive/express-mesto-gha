@@ -42,28 +42,29 @@ const postUser = (req, res, next) => {
   const {
     email, password, name, about, avatar,
   } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      email, password: hash, name, about, avatar,
+    })
+      .then((userData) => {
+        res.send({
+          email: userData.email, name: userData.name, about: userData.about, avatar: userData.avatar,
+        });
+      })
+      .catch((err) => {
+        if (err.code === 11000) {
+          next(new IsUser(ERRORS.IS_USER.USER_ERROR));
+        } else if (err.name === 'ValidationError') {
+          next(new NotCorrectData(ERRORS.VALIDATION.GENERAL));
+        } else {
+          next(err);
+        }
+      }));
+
   User.findOne({ email })
     .then((user) => {
       if (user) {
         throw new IsUser(ERRORS.IS_USER.USER_ERROR);
-      }
-      bcrypt.hash(password, 10)
-        .then((hash) => {
-          User.create({
-            email, password: hash, name, about, avatar,
-          })
-            .then((userData) => {
-              res.send({
-                email: userData.email, name: userData.name, about: userData.about, avatar: userData.avatar,
-              });
-            });
-        });
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new NotCorrectData(ERRORS.VALIDATION.GENERAL));
-      } else {
-        next(err);
       }
     });
 };
@@ -81,7 +82,7 @@ const updateUser = (req, res, next) => {
   )
     .orFail(new NotFoundError(ERRORS.NOT_FOUND.USER))
     .then((user) => {
-      res.send( user );
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -105,7 +106,7 @@ const updateAvatar = (req, res, next) => {
   )
     .orFail(new NotFoundError(ERRORS.NOT_FOUND.USER))
     .then((user) => {
-      res.send( user );
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -130,7 +131,6 @@ const login = (req, res, next) => {
           NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
           { expiresIn: '7d' },
         );
-        console.log(token)
         res.cookie('token', token, { httpOnly: true, sameSite: true });
         res.send({ message: 'Всё верно!' });
       })

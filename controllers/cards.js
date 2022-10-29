@@ -7,7 +7,7 @@ const NotCorrectData = require('../errors/NotCorrectData');
 const getCards = (req, res, next) => {
   Card.find()
     .then((cards) => {
-      res.send( cards );
+      res.send(cards);
     })
     .catch(next);
 };
@@ -20,7 +20,8 @@ const deleteCard = (req, res, next) => {
         throw new NoRight(ERRORS.NO_RIGHT.USER_ERROR);
       }
       Card.deleteOne(card)
-        .then(() => res.send({ message: 'карточка удалена' }));
+        .then(() => res.send({ message: 'карточка удалена' }))
+        .catch(next);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -36,7 +37,7 @@ const postCard = (req, res, next) => {
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => {
-      res.send( card );
+      res.send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -54,7 +55,7 @@ const addLike = (req, res, next) => {
     { new: true },
   )
     .orFail(new NotFoundError(ERRORS.NOT_FOUND.CARDS))
-    .then((card) => (res.send( card )))
+    .then((card) => (res.send(card)))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new NotCorrectData(ERRORS.VALIDATION.GENERAL));
@@ -71,7 +72,7 @@ const removeLike = (req, res, next) => {
     { new: true },
   )
     .orFail(new NotFoundError(ERRORS.NOT_FOUND.CARDS_LIKE))
-    .then((card) => res.send( card ))
+    .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new NotCorrectData(ERRORS.VALIDATION.GENERAL));
